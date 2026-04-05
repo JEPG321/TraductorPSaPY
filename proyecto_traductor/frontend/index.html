@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traductor PseudoPy</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="contenedor">
+        <section class="cabecera">
+            <p class="etiqueta">PseudoPy</p>
+            <h1>Analizador y traductor a Python</h1>
+            <p class="subtitulo">Escribe pseudocodigo estructurado en espanol, valida su sintaxis y obten la traduccion lista para ejecutar.</p>
+        </section>
+
+        <section class="panel principal">
+            <div class="bloque">
+                <label for="codigo">Pseudocodigo</label>
+                <textarea id="codigo" placeholder="INICIO&#10;LEER x&#10;SI x > 5 ENTONCES&#10;ESCRIBIR &quot;Resultado:&quot;, x&#10;SINO&#10;ESCRIBIR &quot;Hola&quot;&#10;FIN&#10;FIN"></textarea>
+            </div>
+            <button id="analizarBtn" type="button">Analizar y traducir</button>
+        </section>
+
+        <section class="resultados">
+            <article class="panel">
+                <h2>Errores</h2>
+                <div id="errores" class="errores vacio">Sin analisis todavia.</div>
+            </article>
+
+            <article class="panel">
+                <h2>Tokens</h2>
+                <pre id="tokens" class="salida">[]</pre>
+            </article>
+
+            <article class="panel">
+                <h2>Python generado</h2>
+                <textarea id="traduccion" readonly placeholder="La traduccion a Python aparecera aqui."></textarea>
+            </article>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

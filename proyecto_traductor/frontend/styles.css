@@ -1,0 +1,177 @@
+:root {
+    --fondo: #f4efe7;
+    --superficie: #fffaf3;
+    --superficie-fuerte: #f0e3d2;
+    --texto: #1b1a17;
+    --texto-secundario: #5f594f;
+    --acento: #22543d;
+    --acento-hover: #173d2c;
+    --borde: #d9ccb9;
+    --error-fondo: #fff1f0;
+    --error-borde: #d63939;
+    --error-texto: #8a1f1f;
+    --sombra: 0 18px 40px rgba(64, 48, 26, 0.12);
+    --radio: 18px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    color: var(--texto);
+    background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.85), transparent 30%),
+        linear-gradient(140deg, #efe7db 0%, #f7f2ea 55%, #e9efe7 100%);
+    min-height: 100vh;
+}
+
+.contenedor {
+    width: min(1120px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 32px 0 48px;
+}
+
+.cabecera {
+    margin-bottom: 24px;
+}
+
+.etiqueta {
+    margin: 0 0 8px;
+    color: var(--acento);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.cabecera h1 {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3.4rem);
+    line-height: 1.05;
+}
+
+.subtitulo {
+    max-width: 720px;
+    margin: 12px 0 0;
+    color: var(--texto-secundario);
+    font-size: 1.05rem;
+}
+
+.panel {
+    background: rgba(255, 250, 243, 0.9);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+    padding: 20px;
+    backdrop-filter: blur(10px);
+}
+
+.principal {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.bloque {
+    display: grid;
+    gap: 10px;
+}
+
+label,
+h2 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+textarea,
+.salida,
+.errores {
+    width: 100%;
+    border: 1px solid var(--borde);
+    border-radius: 14px;
+    background: var(--superficie);
+    color: var(--texto);
+    padding: 16px;
+    font: 500 0.98rem/1.5 "Consolas", "Courier New", monospace;
+}
+
+#codigo,
+#traduccion {
+    min-height: 280px;
+    resize: vertical;
+}
+
+.salida {
+    min-height: 260px;
+    overflow: auto;
+    white-space: pre-wrap;
+    margin: 0;
+}
+
+.errores {
+    min-height: 90px;
+    font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    line-height: 1.5;
+}
+
+.errores.error {
+    background: var(--error-fondo);
+    border-color: var(--error-borde);
+    color: var(--error-texto);
+}
+
+.errores.exito {
+    background: #eef9f1;
+    color: #1a5a32;
+    border-color: #7ab08b;
+}
+
+.vacio {
+    color: var(--texto-secundario);
+}
+
+button {
+    justify-self: start;
+    border: none;
+    border-radius: 999px;
+    padding: 14px 24px;
+    background: var(--acento);
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+    box-shadow: 0 12px 22px rgba(34, 84, 61, 0.25);
+}
+
+button:hover {
+    background: var(--acento-hover);
+    transform: translateY(-1px);
+}
+
+button:disabled {
+    cursor: wait;
+    opacity: 0.7;
+    transform: none;
+}
+
+.resultados {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+
+@media (max-width: 900px) {
+    .resultados {
+        grid-template-columns: 1fr;
+    }
+
+    #codigo,
+    #traduccion,
+    .salida {
+        min-height: 220px;
+    }
+}
