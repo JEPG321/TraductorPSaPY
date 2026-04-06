@@ -102,6 +102,7 @@ textarea,
 #traduccion {
     min-height: 280px;
     resize: vertical;
+    tab-size: 4;
 }
 
 .salida {
