@@ -92,7 +92,7 @@ async function analizarCodigo() {
     boton.textContent = "Analizando...";
     tokensBox.textContent = "[]";
     traduccionBox.value = "";
-    mostrarErrores(["Enviando codigo al backend..."], "vacio");
+    mostrarErrores(["Enviando codigo al backend..."], "vacío");
 
     try {
         const respuesta = await fetch("http://localhost:5000/analizar", {
