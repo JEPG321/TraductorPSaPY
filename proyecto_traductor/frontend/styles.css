@@ -86,6 +86,14 @@ h2 {
     margin: 0;
 }
 
+.panel-encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
 textarea,
 .salida,
 .errores {
@@ -146,6 +154,12 @@ button {
     cursor: pointer;
     transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
     box-shadow: 0 12px 22px rgba(34, 84, 61, 0.25);
+}
+
+.boton-secundario {
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    box-shadow: none;
 }
 
 button:hover {

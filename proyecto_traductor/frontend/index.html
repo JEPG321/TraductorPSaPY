@@ -17,7 +17,7 @@
         <section class="panel principal">
             <div class="bloque">
                 <label for="codigo">Pseudocódigo</label>
-                <textarea id="codigo" placeholder="INICIO&#10;LEER x&#10;SI x > 5 ENTONCES&#10;ESCRIBIR &quot;Resultado:&quot;, x&#10;SINO&#10;ESCRIBIR &quot;Hola&quot;&#10;FIN&#10;FIN"></textarea>
+                <textarea id="codigo" placeholder="INICIO&#10;&emsp;LEER x&#10;&emsp;SI x > 5 ENTONCES&#10;&emsp;&emsp;ESCRIBIR &quot; Resultado:&quot;, x&#10;&emsp;SINO&#10;&emsp;&emsp;ESCRIBIR &quot;Hola&quot;&#10;&emsp;FIN&#10;FIN"></textarea>
             </div>
             <button id="analizarBtn" type="button">Analizar y traducir</button>
         </section>
@@ -34,7 +34,10 @@
             </article>
 
             <article class="panel">
-                <h2>Python generado</h2>
+                <div class="panel-encabezado">
+                    <h2>Python generado</h2>
+                    <button id="copiarTraduccionBtn" type="button" class="boton-secundario" aria-label="Copiar traduccion generada">Copiar</button>
+                </div>
                 <textarea id="traduccion" readonly placeholder="La traduccion a Python aparecera aqui."></textarea>
             </article>
         </section>

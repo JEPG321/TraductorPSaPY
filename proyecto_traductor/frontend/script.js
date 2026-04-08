@@ -1,4 +1,5 @@
 const boton = document.getElementById("analizarBtn");
+const copiarTraduccionBtn = document.getElementById("copiarTraduccionBtn");
 const codigoInput = document.getElementById("codigo");
 const erroresBox = document.getElementById("errores");
 const tokensBox = document.getElementById("tokens");
@@ -85,6 +86,32 @@ function mostrarErrores(mensajes, tipo = "error") {
     erroresBox.innerHTML = mensajes.map((mensaje) => `<div>${mensaje}</div>`).join("");
 }
 
+async function copiarTraduccion() {
+    const texto = traduccionBox.value.trim();
+
+    if (!texto) {
+        const textoOriginal = copiarTraduccionBtn.textContent;
+        copiarTraduccionBtn.textContent = "Sin texto";
+        setTimeout(() => {
+            copiarTraduccionBtn.textContent = textoOriginal;
+        }, 1200);
+        return;
+    }
+
+    const textoOriginal = copiarTraduccionBtn.textContent;
+
+    try {
+        await navigator.clipboard.writeText(texto);
+        copiarTraduccionBtn.textContent = "Copiado";
+    } catch (error) {
+        copiarTraduccionBtn.textContent = "No se pudo";
+    }
+
+    setTimeout(() => {
+        copiarTraduccionBtn.textContent = textoOriginal;
+    }, 1200);
+}
+
 async function analizarCodigo() {
     const codigo = codigoInput.value.trim();
 
@@ -132,4 +159,5 @@ async function analizarCodigo() {
 }
 
 boton.addEventListener("click", analizarCodigo);
+copiarTraduccionBtn.addEventListener("click", copiarTraduccion);
 codigoInput.addEventListener("keydown", manejarEditorCodigo);
