@@ -8,24 +8,28 @@ from typing import Any
 from tokens import TOKEN_REGEX_SPECS
 
 IDENTIFICADOR = r"[a-zA-Z][a-zA-Z0-9]*"
-NUMERO = r"[0-9]+"
+NUMERO_ENTERO = r"[0-9]+"
+NUMERO = r"(?:[0-9]+(?:\.[0-9]+)?)"
 CADENA = r'"[^"\n]*"'
-VALOR = rf"(?:{IDENTIFICADOR}|{NUMERO})"
-ITEM_ESCRIBIR = rf"(?:{CADENA}|{IDENTIFICADOR})"
+BOOLEANO = r"(?:VERDADERO|FALSO)"
+VALOR_ARITMETICO = rf"(?:{IDENTIFICADOR}|{NUMERO})"
+VALOR_GENERAL = rf"(?:{IDENTIFICADOR}|{NUMERO}|{CADENA}|{BOOLEANO})"
+ITEM_ESCRIBIR = rf"(?:{CADENA}|{BOOLEANO}|{VALOR_ARITMETICO})"
 OPERADOR_REL = r"(?:==|!=|<=|>=|<|>)"
-EXPRESION_ARITMETICA = rf"{VALOR}(?:\s*[\+\-\*/]\s*{VALOR})*"
-EXPRESION_RELACIONAL = rf"{VALOR}\s*{OPERADOR_REL}\s*{VALOR}"
+EXPRESION_ARITMETICA = rf"{VALOR_ARITMETICO}(?:\s*[\+\-\*/]\s*{VALOR_ARITMETICO})*"
+EXPRESION_RELACIONAL = rf"{VALOR_GENERAL}\s*{OPERADOR_REL}\s*{VALOR_GENERAL}"
+EXPRESION_ASIGNACION = rf"(?:{EXPRESION_ARITMETICA}|{CADENA}|{BOOLEANO})"
 
 PATRONES = {
     "RESERVADAS": re.compile(
         r"\b(INICIO|SI|SINO|ENTONCES|FIN|SEGUN|CASO|MIENTRAS|HACER|PARA|LEER|ESCRIBIR)\b"
     ),
     "IDENTIFICADOR": re.compile(r"[a-zA-Z][a-zA-Z0-9]*"),
-    "NUMERO": re.compile(r"[0-9]+"),
+    "NUMERO": re.compile(r"(?:[0-9]+(?:\.[0-9]+)?)"),
     "CADENA": re.compile(r'"[^"\n]*"'),
     "INICIO": re.compile(r"^\bINICIO\b$"),
     "ASIGNACION": re.compile(
-        rf"^(?P<destino>{IDENTIFICADOR})\s*=\s*(?P<expresion>{EXPRESION_ARITMETICA})$"
+        rf"^(?P<destino>{IDENTIFICADOR})\s*=\s*(?P<expresion>{EXPRESION_ASIGNACION})$"
     ),
     "LEER": re.compile(rf"^\bLEER\b\s+(?P<variable>{IDENTIFICADOR})$"),
     "ESCRIBIR": re.compile(
@@ -33,17 +37,17 @@ PATRONES = {
     ),
     "SI": re.compile(rf"^\bSI\b\s+(?P<condicion>{EXPRESION_RELACIONAL})\s+\bENTONCES\b$"),
     "SINO": re.compile(r"^\bSINO\b$"),
-    "SEGUN": re.compile(rf"^\bSEGUN\b\s+(?P<expresion>{VALOR})$"),
-    "CASO": re.compile(rf"^\bCASO\b\s+(?P<valor>{NUMERO})$"),
+    "SEGUN": re.compile(rf"^\bSEGUN\b\s+(?P<expresion>{VALOR_GENERAL})$"),
+    "CASO": re.compile(rf"^\bCASO\b\s+(?P<valor>{NUMERO_ENTERO})$"),
     "MIENTRAS": re.compile(
         rf"^\bMIENTRAS\b\s+(?P<condicion>{EXPRESION_RELACIONAL})(?:\s+\bHACER\b)?$"
     ),
     "PARA": re.compile(
         rf"^\bPARA\b\s+"
-        rf"(?P<var_inicial>{IDENTIFICADOR})\s*=\s*(?P<inicio>{NUMERO})\s*;\s*"
-        rf"(?P<izquierda>{VALOR})\s*(?P<operador>{OPERADOR_REL})\s*(?P<derecha>{VALOR})\s*;\s*"
+        rf"(?P<var_inicial>{IDENTIFICADOR})\s*=\s*(?P<inicio>{NUMERO_ENTERO})\s*;\s*"
+        rf"(?P<izquierda>{VALOR_ARITMETICO})\s*(?P<operador>{OPERADOR_REL})\s*(?P<derecha>{VALOR_ARITMETICO})\s*;\s*"
         rf"(?P<var_actualizada>{IDENTIFICADOR})\s*=\s*(?P<var_fuente>{IDENTIFICADOR})\s*"
-        rf"(?P<signo>[\+\-])\s*(?P<paso>{NUMERO})$"
+        rf"(?P<signo>[\+\-])\s*(?P<paso>{NUMERO_ENTERO})$"
     ),
     "FIN": re.compile(r"^\bFIN\b$"),
 }

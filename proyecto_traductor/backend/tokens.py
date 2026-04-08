@@ -14,6 +14,8 @@ TK_LEER = "TK_LEER"
 TK_ESCRIBIR = "TK_ESCRIBIR"
 TK_ID = "TK_ID"
 TK_NUM = "TK_NUM"
+TK_DECIMAL = "TK_DECIMAL"
+TK_BOOL = "TK_BOOL"
 TK_ASIG = "TK_ASIG"
 TK_SUMA = "TK_SUMA"
 TK_RESTA = "TK_RESTA"
@@ -69,6 +71,8 @@ TOKEN_REGEX_SPECS = [
     (TK_LEER, r"\bLEER\b"),
     (TK_ESCRIBIR, r"\bESCRIBIR\b"),
     (TK_CADENA, r'"[^"\n]*"'),
+    (TK_BOOL, r"\b(?:VERDADERO|FALSO)\b"),
+    (TK_DECIMAL, r"\b[0-9]+\.[0-9]+\b"),
     (TK_NUM, r"\b[0-9]+\b"),
     (TK_ID, r"\b[a-zA-Z][a-zA-Z0-9]*\b"),
 ]

@@ -11,6 +11,44 @@ def _indentacion(nivel: int) -> str:
     return "    " * max(nivel, 0)
 
 
+def _traducir_booleanos(fragmento: str) -> str:
+    """Convierte VERDADERO/FALSO a True/False sin tocar el texto entre comillas."""
+    resultado: list[str] = []
+    dentro_de_cadena = False
+    i = 0
+
+    while i < len(fragmento):
+        caracter = fragmento[i]
+        if caracter == '"':
+            dentro_de_cadena = not dentro_de_cadena
+            resultado.append(caracter)
+            i += 1
+            continue
+
+        if not dentro_de_cadena and fragmento.startswith("VERDADERO", i):
+            fin = i + len("VERDADERO")
+            antes = i == 0 or not fragmento[i - 1].isalnum()
+            despues = fin >= len(fragmento) or not fragmento[fin].isalnum()
+            if antes and despues:
+                resultado.append("True")
+                i = fin
+                continue
+
+        if not dentro_de_cadena and fragmento.startswith("FALSO", i):
+            fin = i + len("FALSO")
+            antes = i == 0 or not fragmento[i - 1].isalnum()
+            despues = fin >= len(fragmento) or not fragmento[fin].isalnum()
+            if antes and despues:
+                resultado.append("False")
+                i = fin
+                continue
+
+        resultado.append(caracter)
+        i += 1
+
+    return "".join(resultado)
+
+
 def _construir_range(componentes: dict[str, str]) -> str | None:
     """Trata de convertir un PARA clasico a range(...)."""
     variable = componentes["var_inicial"]
@@ -65,7 +103,7 @@ def traducir_codigo(codigo: str) -> str:
 
         if tipo == "ASIGNACION":
             lineas_python.append(
-                f"{_indentacion(nivel_indentacion)}{match.group('destino')} = {match.group('expresion')}"
+                f"{_indentacion(nivel_indentacion)}{match.group('destino')} = {_traducir_booleanos(match.group('expresion'))}"
             )
             continue
 
@@ -74,19 +112,19 @@ def traducir_codigo(codigo: str) -> str:
 
         if tipo == "LEER":
             lineas_python.append(
-                f"{_indentacion(nivel_indentacion)}{match.group('variable')} = input()"
+                f"{_indentacion(nivel_indentacion)}{match.group('variable')} = float(input())"
             )
             continue
 
         if tipo == "ESCRIBIR":
             lineas_python.append(
-                f"{_indentacion(nivel_indentacion)}print({match.group('expresion')})"
+                f"{_indentacion(nivel_indentacion)}print({_traducir_booleanos(match.group('expresion'))})"
             )
             continue
 
         if tipo == "SI":
             lineas_python.append(
-                f"{_indentacion(nivel_indentacion)}if {match.group('condicion')}:"
+                f"{_indentacion(nivel_indentacion)}if {_traducir_booleanos(match.group('condicion'))}:"
             )
             pila_bloques.append({"tipo": "SI"})
             nivel_indentacion += 1
@@ -100,7 +138,7 @@ def traducir_codigo(codigo: str) -> str:
 
         if tipo == "MIENTRAS":
             lineas_python.append(
-                f"{_indentacion(nivel_indentacion)}while {match.group('condicion')}:"
+                f"{_indentacion(nivel_indentacion)}while {_traducir_booleanos(match.group('condicion'))}:"
             )
             pila_bloques.append({"tipo": "MIENTRAS"})
             nivel_indentacion += 1
@@ -110,7 +148,7 @@ def traducir_codigo(codigo: str) -> str:
             pila_bloques.append(
                 {
                     "tipo": "SEGUN",
-                    "expresion": match.group("expresion"),
+                    "expresion": _traducir_booleanos(match.group("expresion")),
                     "casos": 0,
                     "caso_abierto": False,
                 }
@@ -151,7 +189,9 @@ def traducir_codigo(codigo: str) -> str:
                 f"{componentes['signo']} {componentes['paso']}"
             )
             lineas_python.append(f"{_indentacion(nivel_indentacion)}{variable} = {inicio}")
-            lineas_python.append(f"{_indentacion(nivel_indentacion)}while {condicion}:")
+            lineas_python.append(
+                f"{_indentacion(nivel_indentacion)}while {_traducir_booleanos(condicion)}:"
+            )
             pila_bloques.append(
                 {"tipo": "PARA", "modo": "while", "actualizacion": actualizacion}
             )
