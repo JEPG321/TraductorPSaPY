@@ -75,6 +75,128 @@ body {
     margin-bottom: 20px;
 }
 
+.reglas-panel {
+    margin-bottom: 20px;
+}
+
+.guia-desplegable {
+    display: grid;
+    gap: 18px;
+}
+
+.reglas-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    list-style: none;
+    cursor: pointer;
+}
+
+.reglas-encabezado::-webkit-details-marker {
+    display: none;
+}
+
+.guia-desplegable[open] .reglas-encabezado {
+    padding-bottom: 8px;
+}
+
+.reglas-flecha {
+    margin-left: auto;
+    color: var(--acento);
+    font-size: 1rem;
+    line-height: 1;
+    transition: transform 0.2s ease;
+}
+
+.guia-desplegable[open] .reglas-flecha {
+    transform: rotate(180deg);
+}
+
+.reglas-texto {
+    max-width: 720px;
+    margin: 10px 0 0;
+    color: var(--texto-secundario);
+}
+
+.reglas-resumen {
+    min-width: 220px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid var(--borde);
+    background: var(--superficie-fuerte);
+    display: grid;
+    gap: 4px;
+}
+
+.reglas-resumen strong {
+    font-size: 1.05rem;
+}
+
+.reglas-resumen span {
+    color: var(--texto-secundario);
+    line-height: 1.45;
+    font-size: 0.92rem;
+}
+
+.reglas-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    padding-top: 6px;
+}
+
+.regla-card {
+    border: 1px solid var(--borde);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.56);
+    overflow: hidden;
+}
+
+.regla-card summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 16px;
+    display: grid;
+    gap: 6px;
+}
+
+.regla-card summary::-webkit-details-marker {
+    display: none;
+}
+
+.regla-card[open] {
+    background: var(--superficie);
+    box-shadow: inset 0 0 0 1px rgba(34, 84, 61, 0.12);
+}
+
+.regla-numero {
+    color: var(--acento);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.regla-card p {
+    margin: 0;
+    padding: 0 16px 12px;
+    color: var(--texto-secundario);
+    line-height: 1.5;
+}
+
+.regla-card pre {
+    margin: 0 16px 16px;
+    padding: 12px;
+    background: #f6efe4;
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+    overflow: auto;
+    white-space: pre-wrap;
+    font: 500 0.92rem/1.45 "Consolas", "Courier New", monospace;
+}
+
 .bloque {
     display: grid;
     gap: 10px;
@@ -181,6 +303,10 @@ button:disabled {
 
 @media (max-width: 900px) {
     .resultados {
+        grid-template-columns: 1fr;
+    }
+
+    .reglas-grid {
         grid-template-columns: 1fr;
     }
 

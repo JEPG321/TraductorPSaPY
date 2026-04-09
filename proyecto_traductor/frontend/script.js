@@ -4,6 +4,126 @@ const codigoInput = document.getElementById("codigo");
 const erroresBox = document.getElementById("errores");
 const tokensBox = document.getElementById("tokens");
 const traduccionBox = document.getElementById("traduccion");
+const reglasLista = document.getElementById("reglasLista");
+
+const reglasLenguaje = [
+    {
+        titulo: "Palabras reservadas",
+        descripcion: "El lenguaje reconoce como palabras reservadas SI, SINO, ENTONCES, FIN, SEGUN, CASO, MIENTRAS, HACER, PARA, LEER y ESCRIBIR.",
+        sintaxis: "SI | SINO | ENTONCES | FIN | SEGUN | CASO | MIENTRAS | HACER | PARA | LEER | ESCRIBIR",
+    },
+    {
+        titulo: "Identificadores",
+        descripcion: "Un identificador debe iniciar con una letra y puede continuar con letras o numeros.",
+        sintaxis: "resultado\ncontador1\nvalorFinal",
+    },
+    {
+        titulo: "Numeros enteros",
+        descripcion: "Un numero entero esta formado por uno o mas digitos numericos consecutivos.",
+        sintaxis: "0\n15\n2024",
+    },
+    {
+        titulo: "Operador de asignacion",
+        descripcion: "El operador = permite asignar valores a los identificadores.",
+        sintaxis: "total = 25",
+    },
+    {
+        titulo: "Operadores aritmeticos",
+        descripcion: "El lenguaje permite usar +, -, * y / para realizar operaciones matematicas.",
+        sintaxis: "a + b\nx - y\nn * 2\nm / 4",
+    },
+    {
+        titulo: "Operadores relacionales",
+        descripcion: "Las condiciones pueden usar ==, !=, <, >, <= y >= para comparar valores.",
+        sintaxis: "x == y\nx != y\na < b\nc >= d",
+    },
+    {
+        titulo: "Expresion aritmetica simple",
+        descripcion: "Se forma con identificadores o numeros enteros combinados mediante operadores aritmeticos.",
+        sintaxis: "a + 5\nx * y - 2\n10 / z",
+    },
+    {
+        titulo: "Expresion relacional",
+        descripcion: "Se forma con dos operandos validos separados por un operador relacional.",
+        sintaxis: "edad >= 18\ntotal != limite\nx < 100",
+    },
+    {
+        titulo: "Asignacion de variable",
+        descripcion: "Una asignacion valida incluye identificador, operador = y una expresion aritmetica valida.",
+        sintaxis: "promedio = nota1 + nota2 / 2",
+    },
+    {
+        titulo: "Entrada de datos (LEER)",
+        descripcion: "La instruccion inicia con LEER y luego un identificador valido donde se almacena el valor ingresado.",
+        sintaxis: "LEER edad",
+    },
+    {
+        titulo: "Salida de datos (ESCRIBIR)",
+        descripcion: "La instruccion inicia con ESCRIBIR seguida de un identificador, numero o expresion aritmetica valida.",
+        sintaxis: "ESCRIBIR total\nESCRIBIR 25\nESCRIBIR a + b",
+    },
+    {
+        titulo: "Estructura condicional SI",
+        descripcion: "Debe iniciar con SI, seguir con una condicion relacional valida y luego la palabra ENTONCES.",
+        sintaxis: "SI nota >= 61 ENTONCES",
+    },
+    {
+        titulo: "Estructura opcional SINO",
+        descripcion: "SINO puede usarse dentro de una estructura SI para ejecutar instrucciones alternativas.",
+        sintaxis: "SI x > 0 ENTONCES\n    ESCRIBIR x\nSINO\n    ESCRIBIR 0\nFIN",
+    },
+    {
+        titulo: "Estructura SEGUN",
+        descripcion: "La seleccion multiple inicia con SEGUN seguida de un identificador o numero que sera evaluado.",
+        sintaxis: "SEGUN opcion",
+    },
+    {
+        titulo: "Estructura CASO",
+        descripcion: "Cada alternativa dentro de SEGUN debe iniciar con CASO y un valor especifico.",
+        sintaxis: "CASO 1\nCASO 2",
+    },
+    {
+        titulo: "Estructura MIENTRAS",
+        descripcion: "MIENTRAS debe iniciar con una condicion relacional valida y puede incluir opcionalmente la palabra HACER.",
+        sintaxis: "MIENTRAS contador < 10 HACER",
+    },
+    {
+        titulo: "Estructura PARA",
+        descripcion: "PARA debe incluir variable de control, valor inicial, condicion de terminacion e incremento o decremento.",
+        sintaxis: "PARA i = 0; i < 10; i = i + 1",
+    },
+    {
+        titulo: "Cierre de bloque",
+        descripcion: "Toda estructura de control debe finalizar obligatoriamente con la palabra reservada FIN.",
+        sintaxis: "FIN",
+    },
+    {
+        titulo: "Cadenas de texto",
+        descripcion: "Las cadenas de texto se delimitan con comillas dobles y pueden contener letras, numeros y espacios.",
+        sintaxis: '"Hola mundo"\n"Usuario 1"\n"Total final"',
+    },
+];
+
+function renderizarReglas() {
+    if (!reglasLista) {
+        return;
+    }
+
+    reglasLista.innerHTML = reglasLenguaje
+        .map(
+            (regla, indice) => `
+                <details class="regla-card">
+                    <summary>
+                        <span class="regla-numero">Regla ${indice + 1}</span>
+                        <strong>${regla.titulo}</strong>
+                    </summary>
+                    <p>${regla.descripcion}</p>
+                    <pre>${regla.sintaxis}</pre>
+                </details>
+            `
+        )
+        .join("");
+}
 
 function obtenerInicioLinea(valor, posicion) {
     return valor.lastIndexOf("\n", posicion - 1) + 1;
@@ -161,3 +281,4 @@ async function analizarCodigo() {
 boton.addEventListener("click", analizarCodigo);
 copiarTraduccionBtn.addEventListener("click", copiarTraduccion);
 codigoInput.addEventListener("keydown", manejarEditorCodigo);
+renderizarReglas();
