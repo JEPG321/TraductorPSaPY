@@ -214,11 +214,20 @@ h2 {
     justify-content: space-between;
     gap: 12px;
     margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.acciones-panel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 textarea,
 .salida,
-.errores {
+.errores,
+.arbol-panel {
     width: 100%;
     border: 1px solid var(--borde);
     border-radius: 14px;
@@ -240,6 +249,106 @@ textarea,
     overflow: auto;
     white-space: pre-wrap;
     margin: 0;
+}
+
+.arbol-panel {
+    min-height: 260px;
+    overflow: auto;
+    margin: 0;
+    font-family: "Consolas", "Courier New", monospace;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.oculto {
+    display: none;
+}
+
+.tree-root {
+    display: inline-flex;
+    justify-content: center;
+    min-width: 100%;
+    padding: 8px;
+}
+
+.tree-node {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.tree-label {
+    padding: 6px 10px;
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    background: #fffdf9;
+    white-space: nowrap;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(64, 48, 26, 0.08);
+}
+
+.tree-children {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 24px;
+    position: relative;
+}
+
+.tree-children::before {
+    content: "";
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    width: 2px;
+    height: 16px;
+    background: var(--borde);
+    transform: translateX(-50%);
+}
+
+.tree-child {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    padding-top: 16px;
+}
+
+.tree-child::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 16px;
+    background: var(--borde);
+    transform: translateX(-50%);
+}
+
+.tree-child:not(:only-child)::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    height: 2px;
+    background: var(--borde);
+}
+
+.tree-child:first-child:not(:only-child)::after {
+    left: 50%;
+    right: -9px;
+}
+
+.tree-child:last-child:not(:only-child)::after {
+    left: -9px;
+    right: 50%;
+}
+
+.tree-child:not(:first-child):not(:last-child)::after {
+    left: -9px;
+    right: -9px;
+}
+
+.tree-leaf .tree-label {
+    background: #f7f0e5;
 }
 
 .errores {
@@ -299,6 +408,10 @@ button:disabled {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 20px;
+}
+
+.panel-completo {
+    grid-column: 1 / -1;
 }
 
 @media (max-width: 900px) {

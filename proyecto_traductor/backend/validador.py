@@ -14,9 +14,9 @@ CADENA = r'"[^"\n]*"'
 BOOLEANO = r"(?:VERDADERO|FALSO)"
 VALOR_ARITMETICO = rf"(?:{IDENTIFICADOR}|{NUMERO})"
 VALOR_GENERAL = rf"(?:{IDENTIFICADOR}|{NUMERO}|{CADENA}|{BOOLEANO})"
-ITEM_ESCRIBIR = rf"(?:{CADENA}|{BOOLEANO}|{VALOR_ARITMETICO})"
 OPERADOR_REL = r"(?:==|!=|<=|>=|<|>)"
 EXPRESION_ARITMETICA = rf"{VALOR_ARITMETICO}(?:\s*[\+\-\*/]\s*{VALOR_ARITMETICO})*"
+ITEM_ESCRIBIR = rf"(?:{CADENA}|{BOOLEANO}|{EXPRESION_ARITMETICA})"
 EXPRESION_RELACIONAL = rf"{VALOR_GENERAL}\s*{OPERADOR_REL}\s*{VALOR_GENERAL}"
 EXPRESION_ASIGNACION = rf"(?:{EXPRESION_ARITMETICA}|{CADENA}|{BOOLEANO})"
 
@@ -79,7 +79,6 @@ def clasificar_linea(linea: str) -> dict[str, Any] | None:
 
 
 def tokenizar_linea(linea: str, numero_linea: int) -> list[dict[str, Any]]:
-    """Tokeniza una linea valida respetando el orden de los operadores."""
     posicion = 0
     tokens: list[dict[str, Any]] = []
 
@@ -197,6 +196,486 @@ def validar_estructura(lineas_validas: list[dict[str, Any]]) -> list[str]:
     return errores
 
 
+def _crear_nodo(etiqueta: str, hijos: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    return {"etiqueta": etiqueta, "hijos": hijos or []}
+
+
+def _partir_lista(texto: str, separador: str) -> list[str]:
+    partes: list[str] = []
+    actual: list[str] = []
+    dentro_de_cadena = False
+
+    for caracter in texto:
+        if caracter == '"':
+            dentro_de_cadena = not dentro_de_cadena
+            actual.append(caracter)
+            continue
+
+        if caracter == separador and not dentro_de_cadena:
+            partes.append("".join(actual).strip())
+            actual = []
+            continue
+
+        actual.append(caracter)
+
+    partes.append("".join(actual).strip())
+    return partes
+
+
+def _tokenizar_expresion_aritmetica(expresion: str) -> list[str]:
+    return re.findall(r"[a-zA-Z][a-zA-Z0-9]*|\d+(?:\.\d+)?|[+\-*/]", expresion)
+
+
+def _descomponer_condicion(condicion: str) -> tuple[str, str, str]:
+    coincidencia = re.fullmatch(
+        rf"\s*(?P<izquierda>{VALOR_GENERAL})\s*(?P<operador>{OPERADOR_REL})\s*(?P<derecha>{VALOR_GENERAL})\s*",
+        condicion,
+    )
+    if not coincidencia:
+        return condicion, "", ""
+
+    return (
+        coincidencia.group("izquierda"),
+        coincidencia.group("operador"),
+        coincidencia.group("derecha"),
+    )
+
+
+def _descomponer_condicion_para(condicion: str) -> tuple[str, str, str]:
+    coincidencia = re.fullmatch(
+        rf"\s*(?P<izquierda>{VALOR_ARITMETICO})\s*(?P<operador>{OPERADOR_REL})\s*(?P<derecha>{VALOR_ARITMETICO})\s*",
+        condicion,
+    )
+    if not coincidencia:
+        return condicion, "", ""
+
+    return (
+        coincidencia.group("izquierda"),
+        coincidencia.group("operador"),
+        coincidencia.group("derecha"),
+    )
+
+
+def construir_arbol_derivacion(lineas_validas: list[dict[str, Any]]) -> dict[str, Any]:
+    """Construye un arbol estructurado a partir de lineas ya validadas."""
+    if not lineas_validas:
+        return {}
+
+    indice = 0
+
+    def hoja(etiqueta: str) -> dict[str, Any]:
+        return _crear_nodo(etiqueta)
+
+    def expandir_letra(valor: str) -> dict[str, Any]:
+        return _crear_nodo("<letra>", [hoja(valor)])
+
+    def expandir_digito(valor: str) -> dict[str, Any]:
+        return _crear_nodo("<digito>", [hoja(valor)])
+
+    def expandir_letra_o_digito(valor: str) -> dict[str, Any]:
+        if valor.isdigit():
+            return _crear_nodo("<letra_o_digito>", [expandir_digito(valor)])
+        return _crear_nodo("<letra_o_digito>", [expandir_letra(valor)])
+
+    def expandir_resto_identificador(resto: str) -> dict[str, Any]:
+        if not resto:
+            return _crear_nodo("<resto_identificador>", [hoja("epsilon")])
+
+        return _crear_nodo(
+            "<resto_identificador>",
+            [
+                expandir_letra_o_digito(resto[0]),
+                expandir_resto_identificador(resto[1:]),
+            ],
+        )
+
+    def expandir_identificador(valor: str) -> dict[str, Any]:
+        hijos = [expandir_letra(valor[0])]
+        if len(valor) == 1:
+            return _crear_nodo("<identificador>", hijos)
+
+        hijos.append(expandir_resto_identificador(valor[1:]))
+        return _crear_nodo("<identificador>", hijos)
+
+    def expandir_numero_entero(valor: str) -> dict[str, Any]:
+        if len(valor) == 1:
+            return _crear_nodo("<numero_entero>", [expandir_digito(valor)])
+
+        return _crear_nodo(
+            "<numero_entero>",
+            [
+                expandir_digito(valor[0]),
+                expandir_numero_entero(valor[1:]),
+            ],
+        )
+
+    def expandir_numero_decimal(valor: str) -> dict[str, Any]:
+        izquierda, derecha = valor.split(".", maxsplit=1)
+        return _crear_nodo(
+            "<numero_decimal>",
+            [
+                expandir_numero_entero(izquierda),
+                hoja("."),
+                expandir_numero_entero(derecha),
+            ],
+        )
+
+    def expandir_numero(valor: str) -> dict[str, Any]:
+        if "." in valor:
+            return _crear_nodo("<numero>", [expandir_numero_decimal(valor)])
+        return _crear_nodo("<numero>", [expandir_numero_entero(valor)])
+
+    def expandir_booleano(valor: str) -> dict[str, Any]:
+        return _crear_nodo("<booleano>", [hoja(valor)])
+
+    def expandir_caracter(valor: str) -> dict[str, Any]:
+        if valor.isalpha():
+            return _crear_nodo("<caracter>", [expandir_letra(valor)])
+        if valor.isdigit():
+            return _crear_nodo("<caracter>", [expandir_digito(valor)])
+        return _crear_nodo("<caracter>", [hoja(valor)])
+
+    def expandir_contenido_cadena(contenido: str) -> dict[str, Any]:
+        if not contenido:
+            return _crear_nodo("<contenido_cadena>", [hoja("epsilon")])
+
+        return _crear_nodo(
+            "<contenido_cadena>",
+            [
+                expandir_caracter(contenido[0]),
+                expandir_contenido_cadena(contenido[1:]),
+            ],
+        )
+
+    def expandir_cadena(valor: str) -> dict[str, Any]:
+        contenido = valor[1:-1]
+        return _crear_nodo(
+            "<cadena>",
+            [
+                hoja('"'),
+                expandir_contenido_cadena(contenido),
+                hoja('"'),
+            ],
+        )
+
+    def expandir_operador_aritmetico(valor: str) -> dict[str, Any]:
+        return _crear_nodo("<operador_aritmetico>", [hoja(valor)])
+
+    def expandir_operador_suma_resta(valor: str) -> dict[str, Any]:
+        return _crear_nodo("<operador_suma_resta>", [hoja(valor)])
+
+    def expandir_operador_relacional(valor: str) -> dict[str, Any]:
+        return _crear_nodo("<operador_relacional>", [hoja(valor)])
+
+    def expandir_valor_aritmetico(valor: str) -> dict[str, Any]:
+        valor = valor.strip()
+        if re.fullmatch(IDENTIFICADOR, valor):
+            return _crear_nodo("<valor_aritmetico>", [expandir_identificador(valor)])
+        return _crear_nodo("<valor_aritmetico>", [expandir_numero(valor)])
+
+    def expandir_valor_general(valor: str) -> dict[str, Any]:
+        valor = valor.strip()
+        if re.fullmatch(BOOLEANO, valor):
+            return _crear_nodo("<valor_general>", [expandir_booleano(valor)])
+        if re.fullmatch(IDENTIFICADOR, valor):
+            return _crear_nodo("<valor_general>", [expandir_identificador(valor)])
+        if re.fullmatch(NUMERO, valor):
+            return _crear_nodo("<valor_general>", [expandir_numero(valor)])
+        if re.fullmatch(CADENA, valor):
+            return _crear_nodo("<valor_general>", [expandir_cadena(valor)])
+        return _crear_nodo("<valor_general>", [hoja(valor)])
+
+    def expandir_expresion_aritmetica_desde_tokens(tokens: list[str]) -> dict[str, Any]:
+        if len(tokens) == 1:
+            return _crear_nodo("<expresion_aritmetica>", [expandir_valor_aritmetico(tokens[0])])
+
+        return _crear_nodo(
+            "<expresion_aritmetica>",
+            [
+                expandir_valor_aritmetico(tokens[0]),
+                expandir_operador_aritmetico(tokens[1]),
+                expandir_expresion_aritmetica_desde_tokens(tokens[2:]),
+            ],
+        )
+
+    def expandir_expresion_aritmetica(valor: str) -> dict[str, Any]:
+        return expandir_expresion_aritmetica_desde_tokens(_tokenizar_expresion_aritmetica(valor))
+
+    def expandir_expresion_asignacion(valor: str) -> dict[str, Any]:
+        valor = valor.strip()
+        if re.fullmatch(CADENA, valor):
+            return _crear_nodo("<expresion_asignacion>", [expandir_cadena(valor)])
+        if re.fullmatch(BOOLEANO, valor):
+            return _crear_nodo("<expresion_asignacion>", [expandir_booleano(valor)])
+        return _crear_nodo("<expresion_asignacion>", [expandir_expresion_aritmetica(valor)])
+
+    def expandir_item_escritura(valor: str) -> dict[str, Any]:
+        valor = valor.strip()
+        if re.fullmatch(CADENA, valor):
+            return _crear_nodo("<item_escritura>", [expandir_cadena(valor)])
+        if re.fullmatch(BOOLEANO, valor):
+            return _crear_nodo("<item_escritura>", [expandir_booleano(valor)])
+        return _crear_nodo("<item_escritura>", [expandir_expresion_aritmetica(valor)])
+
+    def expandir_lista_escritura(items: list[str]) -> dict[str, Any]:
+        if len(items) == 1:
+            return _crear_nodo("<lista_escritura>", [expandir_item_escritura(items[0])])
+
+        return _crear_nodo(
+            "<lista_escritura>",
+            [
+                expandir_item_escritura(items[0]),
+                hoja(","),
+                expandir_lista_escritura(items[1:]),
+            ],
+        )
+
+    def expandir_condicion(valor: str) -> dict[str, Any]:
+        izquierda, operador, derecha = _descomponer_condicion(valor)
+        return _crear_nodo(
+            "<condicion>",
+            [
+                expandir_valor_general(izquierda),
+                expandir_operador_relacional(operador),
+                expandir_valor_general(derecha),
+            ],
+        )
+
+    def expandir_condicion_para(valor: str) -> dict[str, Any]:
+        izquierda, operador, derecha = _descomponer_condicion_para(valor)
+        return _crear_nodo(
+            "<condicion_para>",
+            [
+                expandir_valor_aritmetico(izquierda),
+                expandir_operador_relacional(operador),
+                expandir_valor_aritmetico(derecha),
+            ],
+        )
+
+    def expandir_actualizacion(
+        variable_destino: str,
+        variable_fuente: str,
+        signo: str,
+        paso: str,
+    ) -> dict[str, Any]:
+        return _crear_nodo(
+            "<actualizacion>",
+            [
+                expandir_identificador(variable_destino),
+                hoja("="),
+                expandir_identificador(variable_fuente),
+                expandir_operador_suma_resta(signo),
+                expandir_numero_entero(paso),
+            ],
+        )
+
+    def parsear_programa() -> dict[str, Any]:
+        nonlocal indice
+        programa = _crear_nodo("<programa>", [hoja("INICIO")])
+        indice += 1
+        programa["hijos"].append(parsear_lista_instrucciones({"FIN"}))
+        if indice < len(lineas_validas) and lineas_validas[indice]["tipo"] == "FIN":
+            programa["hijos"].append(hoja("FIN"))
+            indice += 1
+        return programa
+
+    def parsear_lista_instrucciones(paradas: set[str]) -> dict[str, Any]:
+        nonlocal indice
+        if indice >= len(lineas_validas) or lineas_validas[indice]["tipo"] in paradas:
+            return _crear_nodo("<lista_instrucciones>", [hoja("epsilon")])
+
+        return _crear_nodo(
+            "<lista_instrucciones>",
+            [
+                _crear_nodo("<instruccion>", [parsear_instruccion()]),
+                parsear_lista_instrucciones(paradas),
+            ],
+        )
+
+    def parsear_instruccion() -> dict[str, Any]:
+        tipo = lineas_validas[indice]["tipo"]
+        if tipo == "ASIGNACION":
+            return parsear_asignacion()
+        if tipo == "LEER":
+            return parsear_leer()
+        if tipo == "ESCRIBIR":
+            return parsear_escribir()
+        if tipo == "SI":
+            return parsear_si()
+        if tipo == "MIENTRAS":
+            return parsear_mientras()
+        if tipo == "PARA":
+            return parsear_para()
+        if tipo == "SEGUN":
+            return parsear_segun()
+        return hoja(lineas_validas[indice]["texto"])
+
+    def parsear_asignacion() -> dict[str, Any]:
+        nonlocal indice
+        info = lineas_validas[indice]
+        indice += 1
+        return _crear_nodo(
+            "<asignacion>",
+            [
+                expandir_identificador(info["match"].group("destino")),
+                hoja("="),
+                expandir_expresion_asignacion(info["match"].group("expresion")),
+            ],
+        )
+
+    def parsear_leer() -> dict[str, Any]:
+        nonlocal indice
+        info = lineas_validas[indice]
+        indice += 1
+        return _crear_nodo(
+            "<leer>",
+            [
+                hoja("LEER"),
+                expandir_identificador(info["match"].group("variable")),
+            ],
+        )
+
+    def parsear_escribir() -> dict[str, Any]:
+        nonlocal indice
+        info = lineas_validas[indice]
+        indice += 1
+        items = _partir_lista(info["match"].group("expresion"), ",")
+        return _crear_nodo(
+            "<escribir>",
+            [
+                hoja("ESCRIBIR"),
+                expandir_lista_escritura(items),
+            ],
+        )
+
+    def parsear_si() -> dict[str, Any]:
+        nonlocal indice
+        info = lineas_validas[indice]
+        indice += 1
+        nodo_si = _crear_nodo(
+            "<si>",
+            [
+                hoja("SI"),
+                expandir_condicion(info["match"].group("condicion")),
+                hoja("ENTONCES"),
+                parsear_lista_instrucciones({"SINO", "FIN"}),
+            ],
+        )
+
+        if indice < len(lineas_validas) and lineas_validas[indice]["tipo"] == "SINO":
+            indice += 1
+            nodo_si["hijos"].append(hoja("SINO"))
+            nodo_si["hijos"].append(parsear_lista_instrucciones({"FIN"}))
+
+        if indice < len(lineas_validas) and lineas_validas[indice]["tipo"] == "FIN":
+            nodo_si["hijos"].append(hoja("FIN"))
+            indice += 1
+
+        return nodo_si
+
+    def parsear_mientras() -> dict[str, Any]:
+        nonlocal indice
+        info = lineas_validas[indice]
+        texto = info["texto"]
+        indice += 1
+
+        hijos = [
+            hoja("MIENTRAS"),
+            expandir_condicion(info["match"].group("condicion")),
+        ]
+        if texto.endswith(" HACER"):
+            hijos.append(hoja("HACER"))
+
+        hijos.append(parsear_lista_instrucciones({"FIN"}))
+        if indice < len(lineas_validas) and lineas_validas[indice]["tipo"] == "FIN":
+            hijos.append(hoja("FIN"))
+            indice += 1
+
+        return _crear_nodo("<mientras>", hijos)
+
+    def parsear_para() -> dict[str, Any]:
+        nonlocal indice
+        info = lineas_validas[indice]
+        indice += 1
+
+        condicion = (
+            f"{info['match'].group('izquierda')} "
+            f"{info['match'].group('operador')} "
+            f"{info['match'].group('derecha')}"
+        )
+
+        hijos = [
+            hoja("PARA"),
+            expandir_identificador(info["match"].group("var_inicial")),
+            hoja("="),
+            expandir_numero_entero(info["match"].group("inicio")),
+            hoja(";"),
+            expandir_condicion_para(condicion),
+            hoja(";"),
+            expandir_actualizacion(
+                info["match"].group("var_actualizada"),
+                info["match"].group("var_fuente"),
+                info["match"].group("signo"),
+                info["match"].group("paso"),
+            ),
+            parsear_lista_instrucciones({"FIN"}),
+        ]
+
+        if indice < len(lineas_validas) and lineas_validas[indice]["tipo"] == "FIN":
+            hijos.append(hoja("FIN"))
+            indice += 1
+
+        return _crear_nodo("<para>", hijos)
+
+    def parsear_segun() -> dict[str, Any]:
+        nonlocal indice
+        info = lineas_validas[indice]
+        indice += 1
+
+        hijos = [
+            hoja("SEGUN"),
+            expandir_valor_general(info["match"].group("expresion")),
+            parsear_lista_casos(),
+        ]
+
+        if indice < len(lineas_validas) and lineas_validas[indice]["tipo"] == "FIN":
+            hijos.append(hoja("FIN"))
+            indice += 1
+
+        return _crear_nodo("<segun>", hijos)
+
+    def parsear_lista_casos() -> dict[str, Any]:
+        if indice >= len(lineas_validas) or lineas_validas[indice]["tipo"] != "CASO":
+            return _crear_nodo("<lista_casos>", [hoja("epsilon")])
+
+        caso_actual = parsear_caso()
+        if indice < len(lineas_validas) and lineas_validas[indice]["tipo"] == "CASO":
+            return _crear_nodo(
+                "<lista_casos>",
+                [
+                    caso_actual,
+                    parsear_lista_casos(),
+                ],
+            )
+
+        return _crear_nodo("<lista_casos>", [caso_actual])
+
+    def parsear_caso() -> dict[str, Any]:
+        nonlocal indice
+        info = lineas_validas[indice]
+        indice += 1
+        return _crear_nodo(
+            "<caso>",
+            [
+                hoja("CASO"),
+                expandir_numero_entero(info["match"].group("valor")),
+                parsear_lista_instrucciones({"CASO", "FIN"}),
+            ],
+        )
+
+    return parsear_programa()
+
+
 def analizar_codigo(codigo: str) -> dict[str, Any]:
     """Realiza la validacion completa y devuelve errores y tokens."""
     errores: list[str] = []
@@ -234,9 +713,14 @@ def analizar_codigo(codigo: str) -> dict[str, Any]:
 
     errores.extend(validar_estructura(lineas_validas))
 
+    arbol_derivacion: dict[str, Any] = {}
+    if not errores:
+        arbol_derivacion = construir_arbol_derivacion(lineas_validas)
+
     return {
         "ok": not errores,
         "errores": errores,
         "tokens": tokens if not errores else [],
         "lineas_validas": lineas_validas,
+        "arbol_derivacion": arbol_derivacion,
     }

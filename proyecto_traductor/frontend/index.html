@@ -11,7 +11,7 @@
         <section class="cabecera">
             <p class="etiqueta">PseudoPy</p>
             <h1>Analizador y traductor a Python</h1>
-            <p class="subtitulo">Escribe pseudocódigo estructurado en español, valida su sintaxis y obten la traducción lista para ejecutar.</p>
+            <p class="subtitulo">Escribe pseudocodigo estructurado en espanol, valida su sintaxis y obten la traduccion lista para ejecutar.</p>
         </section>
 
         <section class="panel reglas-panel">
@@ -21,7 +21,7 @@
                         <p class="etiqueta">Guia rapida</p>
                         <h2>Reglas del lenguaje</h2>
                     </div>
-                    <span class="reglas-flecha" aria-hidden="true">▼</span>
+                    <span class="reglas-flecha" aria-hidden="true">&#9660;</span>
                 </summary>
                 <div id="reglasLista" class="reglas-grid"></div>
             </details>
@@ -29,8 +29,8 @@
 
         <section class="panel principal">
             <div class="bloque">
-                <label for="codigo">Pseudocódigo</label>
-                <textarea id="codigo" placeholder="INICIO&#10;&emsp;LEER x&#10;&emsp;SI x > 5 ENTONCES&#10;&emsp;&emsp;ESCRIBIR &quot; Resultado:&quot;, x&#10;&emsp;SINO&#10;&emsp;&emsp;ESCRIBIR &quot;Hola&quot;&#10;&emsp;FIN&#10;FIN"></textarea>
+                <label for="codigo">Pseudocodigo</label>
+                <textarea id="codigo" placeholder="INICIO&#10;LEER x&#10;SI x &gt; 5 ENTONCES&#10;    ESCRIBIR &quot;Resultado:&quot;, x&#10;SINO&#10;    ESCRIBIR &quot;Hola&quot;&#10;FIN&#10;FIN"></textarea>
             </div>
             <button id="analizarBtn" type="button">Analizar y traducir</button>
         </section>
@@ -38,20 +38,34 @@
         <section class="resultados">
             <article class="panel">
                 <h2>Errores</h2>
-                <div id="errores" class="errores vacio">Sin análisis todavía.</div>
+                <div id="errores" class="errores vacio">Sin analisis todavia.</div>
             </article>
 
             <article class="panel">
-                <h2>Tokens</h2>
-                <pre id="tokens" class="salida">[]</pre>
+                <div class="panel-encabezado">
+                    <h2>Lexemas</h2>
+                    <button id="toggleTokensBtn" type="button" class="boton-secundario" aria-expanded="false">Mostrar</button>
+                </div>
+                <pre id="tokens" class="salida oculto" hidden>[]</pre>
             </article>
 
-            <article class="panel" hidden>
+            <article class="panel">
                 <div class="panel-encabezado">
                     <h2>Python generado</h2>
                     <button id="copiarTraduccionBtn" type="button" class="boton-secundario" aria-label="Copiar traduccion generada">Copiar</button>
                 </div>
                 <textarea id="traduccion" readonly placeholder="La traduccion a Python aparecera aqui."></textarea>
+            </article>
+
+            <article class="panel panel-completo">
+                <div class="panel-encabezado">
+                    <h2>Arbol de derivacion</h2>
+                    <div class="acciones-panel">
+                        <button id="toggleArbolBtn" type="button" class="boton-secundario" aria-expanded="false">Mostrar</button>
+                        <button id="exportarArbolBtn" type="button" class="boton-secundario" disabled>Exportar PNG</button>
+                    </div>
+                </div>
+                <div id="arbolDerivacion" class="arbol-panel vacio oculto" hidden>El arbol aparecera cuando el programa sea valido.</div>
             </article>
         </section>
     </main>

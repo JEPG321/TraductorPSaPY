@@ -23,6 +23,7 @@ def analizar() -> tuple:
                     "errores": ["El cuerpo de la solicitud debe ser JSON e incluir la clave 'codigo'."],
                     "tokens": [],
                     "traduccion": "",
+                    "arbol_derivacion": "",
                 }
             ),
             400,
@@ -38,6 +39,7 @@ def analizar() -> tuple:
                 "errores": resultado["errores"],
                 "tokens": [],
                 "traduccion": "",
+                "arbol_derivacion": "",
             }
         )
 
@@ -48,6 +50,7 @@ def analizar() -> tuple:
             "errores": [],
             "tokens": resultado["tokens"],
             "traduccion": traduccion,
+            "arbol_derivacion": resultado.get("arbol_derivacion", ""),
         }
     )
 

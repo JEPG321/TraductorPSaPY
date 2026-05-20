@@ -29,6 +29,7 @@ TK_MENORIGUAL = "TK_MENORIGUAL"
 TK_MAYORIGUAL = "TK_MAYORIGUAL"
 TK_CADENA = "TK_CADENA"
 TK_COMA = "TK_COMA"
+TK_PUNTOYCOMA = "TK_PUNTOYCOMA"
 
 RESERVED_WORD_TOKENS = {
     "INICIO": TK_INICIO,
@@ -58,6 +59,7 @@ TOKEN_REGEX_SPECS = [
     (TK_MULT, r"\*"),
     (TK_DIV, r"/"),
     (TK_COMA, r","),
+    (TK_PUNTOYCOMA, r";"),
     (TK_INICIO, r"\bINICIO\b"),
     (TK_SI, r"\bSI\b"),
     (TK_SINO, r"\bSINO\b"),
