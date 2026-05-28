@@ -1,5 +1,12 @@
 """Definiciones de tokens y patrones basicos para PseudoPy."""
 
+# ============================================================
+# TOKENS DEL LENGUAJE
+# ============================================================
+# Cada constante representa un tipo de simbolo que puede aparecer
+# en el codigo PseudoPy: palabras reservadas, operadores, numeros,
+# cadenas, identificadores, etc.
+
 TK_SI = "TK_SI"
 TK_INICIO = "TK_INICIO"
 TK_SINO = "TK_SINO"
@@ -31,6 +38,12 @@ TK_CADENA = "TK_CADENA"
 TK_COMA = "TK_COMA"
 TK_PUNTOYCOMA = "TK_PUNTOYCOMA"
 
+# ============================================================
+# PALABRAS RESERVADAS
+# ============================================================
+# Relaciona las palabras propias del lenguaje PseudoPy con su
+# token correspondiente. Sirve para distinguirlas de identificadores.
+
 RESERVED_WORD_TOKENS = {
     "INICIO": TK_INICIO,
     "SI": TK_SI,
@@ -45,6 +58,13 @@ RESERVED_WORD_TOKENS = {
     "LEER": TK_LEER,
     "ESCRIBIR": TK_ESCRIBIR,
 }
+
+# ============================================================
+# PATRONES REGULARES DE TOKENS
+# ============================================================
+# Define como reconocer cada token dentro de una linea de codigo.
+# El orden es importante: primero van operadores compuestos como <=,
+# >=, == y != antes que operadores simples como <, > o =.
 
 TOKEN_REGEX_SPECS = [
     (TK_MENORIGUAL, r"<="),

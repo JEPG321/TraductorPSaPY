@@ -7,9 +7,21 @@ from typing import Any
 from validador import clasificar_linea
 
 
+# ============================================================
+# UTILIDADES DE FORMATO
+# ============================================================
+# Estas funciones auxiliares ayudan a generar codigo Python limpio,
+# especialmente la indentacion de bloques.
+
 def _indentacion(nivel: int) -> str:
     return "    " * max(nivel, 0)
 
+
+# ============================================================
+# TRADUCCION DE VALORES BOOLEANOS
+# ============================================================
+# Convierte los booleanos de PseudoPy a booleanos de Python:
+# VERDADERO -> True y FALSO -> False. No modifica textos entre comillas.
 
 def _traducir_booleanos(fragmento: str) -> str:
     """Convierte VERDADERO/FALSO a True/False sin tocar el texto entre comillas."""
@@ -49,6 +61,12 @@ def _traducir_booleanos(fragmento: str) -> str:
     return "".join(resultado)
 
 
+# ============================================================
+# TRADUCCION DE BUCLES PARA
+# ============================================================
+# Intenta transformar un PARA de PseudoPy en un for con range(...)
+# cuando la estructura del ciclo es compatible con Python.
+
 def _construir_range(componentes: dict[str, str]) -> str | None:
     """Trata de convertir un PARA clasico a range(...)."""
     variable = componentes["var_inicial"]
@@ -82,6 +100,12 @@ def _construir_range(componentes: dict[str, str]) -> str | None:
 
     return None
 
+
+# ============================================================
+# TRADUCTOR PRINCIPAL
+# ============================================================
+# Recorre el codigo PseudoPy linea por linea, clasifica cada instruccion
+# con ayuda del validador y genera el codigo Python equivalente.
 
 def traducir_codigo(codigo: str) -> str:
     """Convierte el pseudocodigo valido a Python con indentacion."""

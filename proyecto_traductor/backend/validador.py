@@ -7,6 +7,13 @@ from typing import Any
 
 from tokens import TOKEN_REGEX_SPECS
 
+# ============================================================
+# DEFINICION DE ELEMENTOS BASICOS DEL LENGUAJE
+# ============================================================
+# Estas expresiones regulares describen las partes pequenas del
+# lenguaje: identificadores, numeros, cadenas, booleanos, operadores
+# y expresiones permitidas.
+
 IDENTIFICADOR = r"[a-zA-Z][a-zA-Z0-9]*"
 NUMERO_ENTERO = r"[0-9]+"
 NUMERO = r"(?:[0-9]+(?:\.[0-9]+)?)"
@@ -19,6 +26,12 @@ EXPRESION_ARITMETICA = rf"{VALOR_ARITMETICO}(?:\s*[\+\-\*/]\s*{VALOR_ARITMETICO}
 ITEM_ESCRIBIR = rf"(?:{CADENA}|{BOOLEANO}|{EXPRESION_ARITMETICA})"
 EXPRESION_RELACIONAL = rf"{VALOR_GENERAL}\s*{OPERADOR_REL}\s*{VALOR_GENERAL}"
 EXPRESION_ASIGNACION = rf"(?:{EXPRESION_ARITMETICA}|{CADENA}|{BOOLEANO})"
+
+# ============================================================
+# PATRONES DE INSTRUCCIONES
+# ============================================================
+# Cada patron valida la forma correcta de una instruccion completa
+# de PseudoPy, por ejemplo INICIO, ASIGNACION, SI, MIENTRAS o PARA.
 
 PATRONES = {
     "RESERVADAS": re.compile(
@@ -52,6 +65,12 @@ PATRONES = {
     "FIN": re.compile(r"^\bFIN\b$"),
 }
 
+# ============================================================
+# ORDEN DE CLASIFICACION DE INSTRUCCIONES
+# ============================================================
+# Define en que orden se intenta reconocer una linea. Esto evita
+# confusiones entre palabras reservadas, identificadores y asignaciones.
+
 ORDEN_INSTRUCCIONES = (
     "SI",
     "INICIO",
@@ -66,8 +85,19 @@ ORDEN_INSTRUCCIONES = (
     "FIN",
 )
 
+# ============================================================
+# PATRONES PARA TOKENIZACION
+# ============================================================
+# Convierte las especificaciones de tokens en expresiones regulares
+# compiladas para analizar cada linea caracter por caracter.
+
 TOKEN_REGEX = [(tipo, re.compile(patron)) for tipo, patron in TOKEN_REGEX_SPECS]
 
+
+# ============================================================
+# CLASIFICACION DE LINEAS
+# ============================================================
+# Identifica que tipo de instruccion representa una linea completa.
 
 def clasificar_linea(linea: str) -> dict[str, Any] | None:
     """Devuelve la instruccion reconocida y su match o None si no coincide."""
@@ -77,6 +107,12 @@ def clasificar_linea(linea: str) -> dict[str, Any] | None:
             return {"tipo": tipo, "match": coincidencia}
     return None
 
+
+# ============================================================
+# TOKENIZACION
+# ============================================================
+# Separa una linea valida en tokens individuales, indicando el tipo,
+# el lexema encontrado y el numero de linea al que pertenece.
 
 def tokenizar_linea(linea: str, numero_linea: int) -> list[dict[str, Any]]:
     posicion = 0
@@ -107,6 +143,12 @@ def tokenizar_linea(linea: str, numero_linea: int) -> list[dict[str, Any]]:
 
     return tokens
 
+
+# ============================================================
+# VALIDACION ESTRUCTURAL
+# ============================================================
+# Revisa que el programa empiece con INICIO, termine con FIN y que
+# los bloques SI, MIENTRAS, SEGUN y PARA esten bien cerrados.
 
 def validar_estructura(lineas_validas: list[dict[str, Any]]) -> list[str]:
     """Valida bloques usando una pila para SI, MIENTRAS, SEGUN y PARA."""
@@ -196,6 +238,12 @@ def validar_estructura(lineas_validas: list[dict[str, Any]]) -> list[str]:
     return errores
 
 
+# ============================================================
+# UTILIDADES PARA CONSTRUIR EL ARBOL DE DERIVACION
+# ============================================================
+# Estas funciones crean nodos y separan expresiones para representar
+# el programa como una estructura jerarquica.
+
 def _crear_nodo(etiqueta: str, hijos: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     return {"etiqueta": etiqueta, "hijos": hijos or []}
 
@@ -255,6 +303,12 @@ def _descomponer_condicion_para(condicion: str) -> tuple[str, str, str]:
         coincidencia.group("derecha"),
     )
 
+
+# ============================================================
+# CONSTRUCCION DEL ARBOL DE DERIVACION
+# ============================================================
+# A partir de lineas ya validadas, genera un arbol que muestra como
+# se deriva cada instruccion segun la gramatica del lenguaje.
 
 def construir_arbol_derivacion(lineas_validas: list[dict[str, Any]]) -> dict[str, Any]:
     """Construye un arbol estructurado a partir de lineas ya validadas."""
@@ -675,6 +729,12 @@ def construir_arbol_derivacion(lineas_validas: list[dict[str, Any]]) -> dict[str
 
     return parsear_programa()
 
+
+# ============================================================
+# ANALISIS COMPLETO DEL CODIGO
+# ============================================================
+# Funcion principal del modulo. Clasifica lineas, tokeniza, valida la
+# estructura y, si no hay errores, construye el arbol de derivacion.
 
 def analizar_codigo(codigo: str) -> dict[str, Any]:
     """Realiza la validacion completa y devuelve errores y tokens."""
