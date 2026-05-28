@@ -333,7 +333,7 @@ def construir_arbol_derivacion(lineas_validas: list[dict[str, Any]]) -> dict[str
 
     def expandir_resto_identificador(resto: str) -> dict[str, Any]:
         if not resto:
-            return _crear_nodo("<resto_identificador>", [hoja("epsilon")])
+            return _crear_nodo("<resto_identificador>", [hoja("ε")])
 
         return _crear_nodo(
             "<resto_identificador>",
@@ -391,7 +391,7 @@ def construir_arbol_derivacion(lineas_validas: list[dict[str, Any]]) -> dict[str
 
     def expandir_contenido_cadena(contenido: str) -> dict[str, Any]:
         if not contenido:
-            return _crear_nodo("<contenido_cadena>", [hoja("epsilon")])
+            return _crear_nodo("<contenido_cadena>", [hoja("ε")])
 
         return _crear_nodo(
             "<contenido_cadena>",
@@ -536,7 +536,7 @@ def construir_arbol_derivacion(lineas_validas: list[dict[str, Any]]) -> dict[str
     def parsear_lista_instrucciones(paradas: set[str]) -> dict[str, Any]:
         nonlocal indice
         if indice >= len(lineas_validas) or lineas_validas[indice]["tipo"] in paradas:
-            return _crear_nodo("<lista_instrucciones>", [hoja("epsilon")])
+            return _crear_nodo("<lista_instrucciones>", [hoja("ε")])
 
         return _crear_nodo(
             "<lista_instrucciones>",
@@ -700,7 +700,7 @@ def construir_arbol_derivacion(lineas_validas: list[dict[str, Any]]) -> dict[str
 
     def parsear_lista_casos() -> dict[str, Any]:
         if indice >= len(lineas_validas) or lineas_validas[indice]["tipo"] != "CASO":
-            return _crear_nodo("<lista_casos>", [hoja("epsilon")])
+            return _crear_nodo("<lista_casos>", [hoja("ε")])
 
         caso_actual = parsear_caso()
         if indice < len(lineas_validas) and lineas_validas[indice]["tipo"] == "CASO":
