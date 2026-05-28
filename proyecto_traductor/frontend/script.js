@@ -75,10 +75,10 @@ const reglasLenguaje = [
     },
     {
         titulo: "BNF corregida",
-        descripcion: "Esta version esta alineada con lo que valida actualmente el backend.",
+        descripcion: "Gramatica BNF base guardada para referencia dentro de la app.",
         sintaxis:
 `<programa> ::= INICIO <lista_instrucciones> FIN
-<lista_instrucciones> ::= <instruccion> <lista_instrucciones> | epsilon
+<lista_instrucciones> ::= <instruccion> <lista_instrucciones> | \u03B5
 <instruccion> ::= <asignacion> | <leer> | <escribir> | <si> | <mientras> | <para> | <segun>
 <asignacion> ::= <identificador> "=" <expresion_asignacion>
 <leer> ::= LEER <identificador>
@@ -88,8 +88,7 @@ const reglasLenguaje = [
        | SI <condicion> ENTONCES <lista_instrucciones> SINO <lista_instrucciones> FIN
 <mientras> ::= MIENTRAS <condicion> <lista_instrucciones> FIN
              | MIENTRAS <condicion> HACER <lista_instrucciones> FIN
-<para> ::= PARA <identificador> "=" <numero_entero> ";" <condicion_para> ";" <actualizacion> <lista_instrucciones> FIN
-<condicion_para> ::= <valor_aritmetico> <operador_relacional> <valor_aritmetico>
+<para> ::= PARA <identificador> "=" <numero_entero> ";" <condicion> ";" <actualizacion> <lista_instrucciones> FIN
 <actualizacion> ::= <identificador> "=" <identificador> <operador_suma_resta> <numero_entero>
 <segun> ::= SEGUN <valor_general> <lista_casos> FIN
 <lista_casos> ::= <caso> <lista_casos> | <caso>
@@ -97,7 +96,44 @@ const reglasLenguaje = [
 <condicion> ::= <valor_general> <operador_relacional> <valor_general>
 <expresion_asignacion> ::= <expresion_aritmetica> | <cadena> | <booleano>
 <expresion_aritmetica> ::= <valor_aritmetico> | <valor_aritmetico> <operador_aritmetico> <expresion_aritmetica>
-<item_escritura> ::= <cadena> | <booleano> | <expresion_aritmetica>`,
+<item_escritura> ::= <cadena> | <booleano> | <valor_aritmetico>
+<valor_general> ::= <identificador> | <numero> | <cadena> | <booleano>
+<valor_aritmetico> ::= <identificador> | <numero>
+<operador_aritmetico> ::= "+" | "-" | "*" | "/"
+<operador_suma_resta> ::= "+" | "-"
+<operador_relacional> ::= "==" | "!=" | "<" | ">" | "<=" | ">="
+<numero> ::= <numero_entero> | <numero_decimal>
+<numero_entero> ::= <digito> | <digito> <numero_entero>
+<numero_decimal> ::= <numero_entero> "." <numero_entero>
+<identificador> ::= <letra> | <letra> <resto_identificador>
+<resto_identificador> ::= <letra_o_digito> <resto_identificador> | \u03B5
+<letra_o_digito> ::= <letra> | <digito>
+<cadena> ::= '"' <contenido_cadena> '"'
+<contenido_cadena> ::= <caracter> <contenido_cadena> | \u03B5
+<booleano> ::= VERDADERO | FALSO
+<letra> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n"
+          | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+          | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N"
+          | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
+<digito> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+<caracter> ::= <letra> | <digito> | " " | "+" | "-" | "*" | "/" | "=" | "<" | ">" | "_" | "." | ","
+             | ":" | ";" | "?" | "!"`,
+    },
+    {
+        titulo: "Cadena derivada de ejemplo",
+        descripcion: "Derivacion guardada como ejemplo para la cadena `INICIO ESCRIBIR x FIN`.",
+        sintaxis:
+`<programa> \u21D2 INICIO <lista_instrucciones> FIN
+\u21D2 INICIO <instruccion> <lista_instrucciones> FIN
+\u21D2 INICIO <escribir> <lista_instrucciones> FIN
+\u21D2 INICIO ESCRIBIR <lista_escritura> <lista_instrucciones> FIN
+\u21D2 INICIO ESCRIBIR <item_escritura> <lista_instrucciones> FIN
+\u21D2 INICIO ESCRIBIR <valor_aritmetico> <lista_instrucciones> FIN
+\u21D2 INICIO ESCRIBIR <identificador> <lista_instrucciones> FIN
+\u21D2 INICIO ESCRIBIR <letra> <lista_instrucciones> FIN
+\u21D2 INICIO ESCRIBIR x <lista_instrucciones> FIN
+\u21D2 INICIO ESCRIBIR x \u03B5 FIN
+\u21D2 INICIO ESCRIBIR x FIN`,
     },
 ];
 
