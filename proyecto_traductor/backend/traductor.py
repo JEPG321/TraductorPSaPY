@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from validador import clasificar_linea
@@ -79,12 +80,18 @@ def _construir_range(componentes: dict[str, str]) -> str | None:
     paso = int(componentes["paso"])
     inicio = componentes["inicio"]
 
+    patron_valor_range = re.compile(r"(?:[a-zA-Z][a-zA-Z0-9]*|[0-9]+)")
+
     variables_compatibles = (
         izquierda == variable
         and var_actualizada == variable
         and var_fuente == variable
     )
-    if not variables_compatibles:
+    valores_compatibles = (
+        patron_valor_range.fullmatch(izquierda) is not None
+        and patron_valor_range.fullmatch(derecha) is not None
+    )
+    if not variables_compatibles or not valores_compatibles:
         return None
 
     if signo == "+" and operador in {"<", "<="}:

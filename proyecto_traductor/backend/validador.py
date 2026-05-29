@@ -17,13 +17,14 @@ from tokens import TOKEN_REGEX_SPECS
 IDENTIFICADOR = r"[a-zA-Z][a-zA-Z0-9]*"
 NUMERO_ENTERO = r"[0-9]+"
 NUMERO = r"(?:[0-9]+(?:\.[0-9]+)?)"
-CADENA = r'"[^"\n]*"'
+CARACTER_CADENA = r"[a-zA-Z0-9 +\-*/=<>_.,:;?!]"
+CADENA = rf'"{CARACTER_CADENA}*"'
 BOOLEANO = r"(?:VERDADERO|FALSO)"
 VALOR_ARITMETICO = rf"(?:{IDENTIFICADOR}|{NUMERO})"
 VALOR_GENERAL = rf"(?:{IDENTIFICADOR}|{NUMERO}|{CADENA}|{BOOLEANO})"
 OPERADOR_REL = r"(?:==|!=|<=|>=|<|>)"
 EXPRESION_ARITMETICA = rf"{VALOR_ARITMETICO}(?:\s*[\+\-\*/]\s*{VALOR_ARITMETICO})*"
-ITEM_ESCRIBIR = rf"(?:{CADENA}|{BOOLEANO}|{EXPRESION_ARITMETICA})"
+ITEM_ESCRIBIR = rf"(?:{CADENA}|{BOOLEANO}|{VALOR_ARITMETICO})"
 EXPRESION_RELACIONAL = rf"{VALOR_GENERAL}\s*{OPERADOR_REL}\s*{VALOR_GENERAL}"
 EXPRESION_ASIGNACION = rf"(?:{EXPRESION_ARITMETICA}|{CADENA}|{BOOLEANO})"
 
@@ -39,7 +40,7 @@ PATRONES = {
     ),
     "IDENTIFICADOR": re.compile(r"[a-zA-Z][a-zA-Z0-9]*"),
     "NUMERO": re.compile(r"(?:[0-9]+(?:\.[0-9]+)?)"),
-    "CADENA": re.compile(r'"[^"\n]*"'),
+    "CADENA": re.compile(CADENA),
     "INICIO": re.compile(r"^\bINICIO\b$"),
     "ASIGNACION": re.compile(
         rf"^(?P<destino>{IDENTIFICADOR})\s*=\s*(?P<expresion>{EXPRESION_ASIGNACION})$"
@@ -58,7 +59,7 @@ PATRONES = {
     "PARA": re.compile(
         rf"^\bPARA\b\s+"
         rf"(?P<var_inicial>{IDENTIFICADOR})\s*=\s*(?P<inicio>{NUMERO_ENTERO})\s*;\s*"
-        rf"(?P<izquierda>{VALOR_ARITMETICO})\s*(?P<operador>{OPERADOR_REL})\s*(?P<derecha>{VALOR_ARITMETICO})\s*;\s*"
+        rf"(?P<izquierda>{VALOR_GENERAL})\s*(?P<operador>{OPERADOR_REL})\s*(?P<derecha>{VALOR_GENERAL})\s*;\s*"
         rf"(?P<var_actualizada>{IDENTIFICADOR})\s*=\s*(?P<var_fuente>{IDENTIFICADOR})\s*"
         rf"(?P<signo>[\+\-])\s*(?P<paso>{NUMERO_ENTERO})$"
     ),
@@ -291,7 +292,7 @@ def _descomponer_condicion(condicion: str) -> tuple[str, str, str]:
 
 def _descomponer_condicion_para(condicion: str) -> tuple[str, str, str]:
     coincidencia = re.fullmatch(
-        rf"\s*(?P<izquierda>{VALOR_ARITMETICO})\s*(?P<operador>{OPERADOR_REL})\s*(?P<derecha>{VALOR_ARITMETICO})\s*",
+        rf"\s*(?P<izquierda>{VALOR_GENERAL})\s*(?P<operador>{OPERADOR_REL})\s*(?P<derecha>{VALOR_GENERAL})\s*",
         condicion,
     )
     if not coincidencia:
@@ -469,6 +470,8 @@ def construir_arbol_derivacion(lineas_validas: list[dict[str, Any]]) -> dict[str
             return _crear_nodo("<item_escritura>", [expandir_cadena(valor)])
         if re.fullmatch(BOOLEANO, valor):
             return _crear_nodo("<item_escritura>", [expandir_booleano(valor)])
+        if re.fullmatch(IDENTIFICADOR, valor) or re.fullmatch(NUMERO, valor):
+            return _crear_nodo("<item_escritura>", [expandir_valor_aritmetico(valor)])
         return _crear_nodo("<item_escritura>", [expandir_expresion_aritmetica(valor)])
 
     def expandir_lista_escritura(items: list[str]) -> dict[str, Any]:
@@ -498,11 +501,11 @@ def construir_arbol_derivacion(lineas_validas: list[dict[str, Any]]) -> dict[str
     def expandir_condicion_para(valor: str) -> dict[str, Any]:
         izquierda, operador, derecha = _descomponer_condicion_para(valor)
         return _crear_nodo(
-            "<condicion_para>",
+            "<condicion>",
             [
-                expandir_valor_aritmetico(izquierda),
+                expandir_valor_general(izquierda),
                 expandir_operador_relacional(operador),
-                expandir_valor_aritmetico(derecha),
+                expandir_valor_general(derecha),
             ],
         )
 
@@ -700,7 +703,7 @@ def construir_arbol_derivacion(lineas_validas: list[dict[str, Any]]) -> dict[str
 
     def parsear_lista_casos() -> dict[str, Any]:
         if indice >= len(lineas_validas) or lineas_validas[indice]["tipo"] != "CASO":
-            return _crear_nodo("<lista_casos>", [hoja("ε")])
+            raise ValueError("SEGUN invalido: se esperaba al menos un CASO")
 
         caso_actual = parsear_caso()
         if indice < len(lineas_validas) and lineas_validas[indice]["tipo"] == "CASO":

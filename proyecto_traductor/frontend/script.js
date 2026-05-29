@@ -50,8 +50,8 @@ const reglasLenguaje = [
     },
     {
         titulo: "LEER y ESCRIBIR",
-        descripcion: "LEER recibe un identificador. ESCRIBIR acepta cadenas, booleanos y expresiones aritmeticas separadas por comas.",
-        sintaxis: "LEER edad\nESCRIBIR \"Resultado:\", total\nESCRIBIR activo\nESCRIBIR a + b",
+        descripcion: "LEER recibe un identificador. ESCRIBIR acepta cadenas, booleanos y valores aritmeticos separados por comas.",
+        sintaxis: "LEER edad\nESCRIBIR \"Resultado:\", total\nESCRIBIR activo\nESCRIBIR contador",
     },
     {
         titulo: "Bloque SI",
@@ -65,7 +65,7 @@ const reglasLenguaje = [
     },
     {
         titulo: "Bloque PARA",
-        descripcion: "PARA usa inicializacion entera, condicion relacional entre valores aritmeticos y actualizacion con suma o resta.",
+        descripcion: "PARA usa inicializacion entera, una condicion relacional y una actualizacion con suma o resta.",
         sintaxis: "PARA i = 0; i < 10; i = i + 1\n    ESCRIBIR i\nFIN",
     },
     {
